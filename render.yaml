@@ -1,0 +1,18 @@
+# Render blueprint: one web service (API + app). The prototype serves the committed
+# snapshot; production runs the refresh job on a schedule and writes the snapshot
+# to object storage (see README, "Cloud").
+services:
+  - type: web
+    name: finn
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: LLM_API_KEY      # free Gemini key from aistudio.google.com
+        sync: false
+      - key: LLM_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai
+      - key: LLM_MODEL_CHEAP
+        value: gemini-3.1-flash-lite
+      - key: LLM_MODEL_STRONG
+        value: gemini-3.5-flash
