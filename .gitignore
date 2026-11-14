@@ -7,3 +7,4 @@ data/cache/
 data/finn.db*
 .env
 .DS_Store
+*.tsbuildinfo
