@@ -1,0 +1,47 @@
+{
+  "_note": "Stand-in for a licensed people-data provider. Only facts checked against the public sources listed, about public roles. Profiles found inside filings are extracted automatically and never stored here.",
+  "profiles": [
+    {
+      "name": "Anup Bagchi",
+      "current": {"org": "HDFC Bank", "title": "Managing Director & CEO", "from": "2026"},
+      "career": [
+        {"org": "HDFC Bank", "title": "Managing Director & CEO", "from": "2026", "to": null},
+        {"org": "ICICI Prudential Life Insurance", "title": "Managing Director & CEO", "from": "2023", "to": "2026"},
+        {"org": "ICICI Bank", "title": "Executive Director", "from": "2017", "to": "2023"},
+        {"org": "ICICI Securities", "title": "Managing Director & CEO", "from": "2011", "to": "2016"},
+        {"org": "ICICI Group", "title": "Joined the group", "from": "1992", "to": "2011"}
+      ],
+      "education": [
+        {"school": "IIT Kanpur", "degree": "B.Tech, Chemical Engineering", "year": 1990},
+        {"school": "IIM Bangalore", "degree": "Post-graduate programme in management", "year": null}
+      ],
+      "sources": ["https://iitk.ac.in/dora/profile/mr-anup-bagchi",
+                  "https://www.outlookbusiness.com/corporate/anup-bagchis-road-to-hdfc-bank-runs-through-34-years-of-icici"]
+    },
+    {
+      "name": "Bahram Vakil",
+      "current": {"org": "Trent", "title": "Chairman (from 12 Nov 2026)", "from": "2026"},
+      "career": [
+        {"org": "AZB & Partners", "title": "Founding Partner (project finance, restructuring)", "from": "2004", "to": null},
+        {"org": "Tata Investment Corporation", "title": "Vice-Chairman & Independent Director", "from": null, "to": null},
+        {"org": "BASF India", "title": "Director", "from": null, "to": null}
+      ],
+      "education": [],
+      "sources": ["https://www.barandbench.com/amp/story/news/law-policy/azb-co-founder-bahram-vakil-to-succeed-noel-tata-as-trent-chairman",
+                  "https://www.azbpartners.com/history/"]
+    },
+    {
+      "name": "Leo Puri",
+      "current": {"org": "Asian Paints", "title": "Independent Director; Chairman from 23 Jan 2027", "from": "2026"},
+      "career": [
+        {"org": "JPMorgan Chase", "title": "Chairman, South & South-East Asia", "from": "2021", "to": null},
+        {"org": "UTI Asset Management", "title": "Managing Director & CEO", "from": "2013", "to": "2018"},
+        {"org": "Warburg Pincus", "title": "Managing Director & General Partner", "from": "2007", "to": "2012"},
+        {"org": "McKinsey & Company", "title": "Senior Partner", "from": null, "to": "2007"}
+      ],
+      "education": [],
+      "sources": ["https://www.outlookbusiness.com/corporate/meet-leo-puri-the-financial-veteran-taking-over-as-asian-paints-chairman",
+                  "https://tata.com/management-team/board-of-directors/leo-puri"]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "investor": "Kabir Sethi",
+  "fund": "Northfield Capital (fictional long-only fund, Mumbai)",
+  "portfolio": [
+    {"symbol": "HDFCBANK",   "weight": 8.5},
+    {"symbol": "RELIANCE",   "weight": 7.0},
+    {"symbol": "BHARTIARTL", "weight": 6.0},
+    {"symbol": "LT",         "weight": 5.5},
+    {"symbol": "BAJFINANCE", "weight": 5.0},
+    {"symbol": "TITAN",      "weight": 4.5},
+    {"symbol": "SUNPHARMA",  "weight": 4.5},
+    {"symbol": "TRENT",      "weight": 4.0},
+    {"symbol": "ETERNAL",    "weight": 4.0},
+    {"symbol": "APOLLOHOSP", "weight": 4.0},
+    {"symbol": "INDIGO",     "weight": 3.5},
+    {"symbol": "PERSISTENT", "weight": 3.5},
+    {"symbol": "CGPOWER",    "weight": 3.5},
+    {"symbol": "POLYCAB",    "weight": 3.0},
+    {"symbol": "DIXON",      "weight": 3.0},
+    {"symbol": "AUBANK",     "weight": 2.5},
+    {"symbol": "NAVINFLUOR", "weight": 2.5},
+    {"symbol": "PIIND",      "weight": 2.0},
+    {"symbol": "KAYNES",     "weight": 2.0},
+    {"symbol": "CREDITACC",  "weight": 1.5}
+  ],
+  "research": ["DEEPAKNTR", "MANAPPURAM", "LAURUSLABS", "ASIANPAINT"]
+}

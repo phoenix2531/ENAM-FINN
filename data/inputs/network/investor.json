@@ -1,0 +1,27 @@
+{
+  "name": "Kabir Sethi",
+  "role": "Portfolio Manager",
+  "fund": "Northfield Capital",
+  "_note": "Fictional investor. This file is what FINN asks for at onboarding: your own schools and employers, plus the company meetings already in your calendar.",
+  "education": [
+    {"school": "IIT Bombay", "degree": "B.Tech, Chemical Engineering", "year": 2008},
+    {"school": "IIM Ahmedabad", "degree": "PGP", "year": 2012}
+  ],
+  "positions": [
+    {"org": "Northfield Capital", "title": "Portfolio Manager", "from": "2016", "to": null},
+    {"org": "Kotak Institutional Equities", "title": "Analyst, Chemicals & Industrials", "from": "2012", "to": "2016"}
+  ],
+  "company_meetings": [
+    {"date": "2026-02-11", "symbol": "HDFCBANK", "with": "Former MD & CEO and CFO, at an investor conference"},
+    {"date": "2026-03-19", "symbol": "POLYCAB", "with": "CFO and IR, one-on-one"},
+    {"date": "2025-08-07", "symbol": "CGPOWER", "with": "Management, group meeting"},
+    {"date": "2025-02-18", "symbol": "KAYNES", "with": "Mysuru plant visit"},
+    {"date": "2026-01-22", "symbol": "PERSISTENT", "with": "CEO, one-on-one"},
+    {"date": "2025-11-05", "symbol": "NAVINFLUOR", "with": "MD and CFO, Dahej site visit"},
+    {"date": "2025-06-12", "symbol": "APOLLOHOSP", "with": "Hospitals division leadership"},
+    {"date": "2026-04-09", "symbol": "TRENT", "with": "Store walk-through and IR"},
+    {"date": "2026-07-14", "symbol": "AUBANK", "with": "MD & CEO, group meeting"},
+    {"date": "2026-05-06", "symbol": "CREDITACC", "with": "CFO, field visit in Karnataka"},
+    {"date": "2026-09-23", "symbol": "DEEPAKNTR", "with": "Investor day"}
+  ]
+}
