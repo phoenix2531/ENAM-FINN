@@ -29,3 +29,4 @@ export const IGap = (p: P) => <S {...p}><circle cx="12" cy="12" r="8" /><path d=
 export const ICal = (p: P) => <S {...p}><rect x="4" y="5.5" width="16" height="14.5" rx="2" /><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" /></S>
 export const IPulse = (p: P) => <S {...p}><path d="M3 12h4l2.5-6 5 12 2.5-6h4" /></S>
 export const IUser = (p: P) => <S {...p}><circle cx="12" cy="8.5" r="3.5" /><path d="M5 20a7 7 0 0 1 14 0" /></S>
+export const IEdit = (p: P) => <S {...p}><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" /><path d="m13.5 6.5 4 4" /></S>

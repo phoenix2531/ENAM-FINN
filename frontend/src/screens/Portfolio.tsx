@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { IAlert, IBack, IChev } from '../components/Icons'
+import { EditProfile } from '../components/EditProfile'
+import { IAlert, IBack, IChev, IClose, IEdit, IPath } from '../components/Icons'
 import { Avatar } from '../components/People'
 import { bookToday, Delta, hue, Spark, Tie } from '../components/Viz'
 import { useApp } from '../ctx'
@@ -29,7 +30,9 @@ const sectorGroup = (s: string) => GROUPS.find(([re]) => re.test(s))?.[1] ?? 'Ot
 const GROUP_HUE: Record<string, number> = { Financials: 232, 'Tech & Telecom': 200, Industrials: 48, Healthcare: 145, Consumer: 322, 'Energy & Materials': 18, Other: 262 }
 
 export function Portfolio() {
-  const { b, now, rules, go } = useApp()
+  const { b, now, rules, go, profileEdit, setProfileEdit, originalInvestor, toast } = useApp()
+  const [editing, setEditing] = useState(false)
+  const [showJourney, setShowJourney] = useState(false)
   const [sort, setSort] = useState<SortKey>('weight')
   const inv = b.meta.investor
   const book = useMemo(() => bookToday(b), [b])
@@ -70,14 +73,40 @@ export function Portfolio() {
     <div className="screen pf-screen">
       <button className="back" onClick={() => history.length > 1 ? history.back() : go({ tab: 'brief' })}><IBack size={17} /> Back</button>
 
+      <div className={`pf-top ${showJourney ? 'open' : ''}`}>
       <div className="pf-head">
         <Avatar p={{ name: inv.name }} />
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div className="dateline"><span>Portfolio</span></div>
-          <h1 className="h1" style={{ margin: '2px 0 0' }}>{inv.name}</h1>
+          <div className="pf-name-row">
+            <h1 className="h1" style={{ margin: '2px 0 0' }}>{inv.name}</h1>
+            <button className="pf-edit" onClick={() => setEditing(true)}><IEdit size={14} />Edit profile</button>
+            <button className={`pf-edit ${showJourney ? 'on' : ''}`} onClick={() => setShowJourney(v => !v)} aria-expanded={showJourney}>
+              <IPath size={14} />Journey<span className="pf-edit-chev" style={{ transform: showJourney ? 'rotate(90deg)' : undefined }}><IChev size={13} /></span>
+            </button>
+          </div>
           <div className="small muted">{inv.role}, {inv.fund}</div>
         </div>
       </div>
+      {showJourney && <Journey onClose={() => setShowJourney(false)} />}
+      </div>
+
+      {profileEdit && (
+        <div className="pf-pending">
+          <span className="warn"><IAlert size={16} /></span>
+          <div className="grow" style={{ minWidth: 0 }}>
+            <div className="small"><span className="strong">Verification pending</span> <span className="muted">· submitted {new Date(profileEdit.submitted).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></div>
+            {profileEdit.proofs.map(p => (
+              <div key={p.field} className="tiny muted ellipsis" title={p.sha256}>
+                {p.field === 'fund' ? 'Firm' : p.field[0].toUpperCase() + p.field.slice(1)}: <span className="strong">{originalInvestor[p.field]}</span> → <span className="strong">{profileEdit.values[p.field]}</span>
+                <span className="faint"> · {p.kind}: {p.file} · SHA-256 {p.sha256.slice(0, 12)}…</span>
+              </div>
+            ))}
+          </div>
+          <button className="link tiny" onClick={() => { setProfileEdit(null); toast('Profile changes withdrawn') }}>Withdraw</button>
+        </div>
+      )}
+      {editing && <EditProfile onClose={() => setEditing(false)} />}
 
       <div className="card book pf-stats">
         <div>
@@ -169,6 +198,100 @@ export function Portfolio() {
 
       {/* Wide screens: Friends beside the holdings. */}
       <aside className="pf-aside"><Friends compact /></aside>
+      </div>
+    </div>
+  )
+}
+
+type Stop = { org: string; title: string; from: number | null; to: number | null; pending?: boolean }
+
+/** Your journey of firms, newest first, with the friends you overlapped with at each. */
+function Journey({ onClose }: { onClose: () => void }) {
+  const { b, originalInvestor, profileEdit, openPerson } = useApp()
+  const year = new Date(b.meta.today).getFullYear()
+  const yr = (v: string | number | null | undefined) => v == null || v === '' ? null : Number(v)
+
+  const stops = useMemo<Stop[]>(() => {
+    const base: Stop[] = (originalInvestor.positions ?? []).map(p => ({ org: p.org, title: p.title, from: yr(p.from), to: yr(p.to) }))
+      .sort((a, c) => (c.from ?? 0) - (a.from ?? 0))
+    const v = profileEdit?.values
+    if (!v?.fund && !v?.role) return base
+    // A pending firm change starts a new stop this year; a pending role change retitles the current one.
+    if (v.fund) {
+      const out = base.map(s => s.to == null ? { ...s, to: year } : s)
+      return [{ org: v.fund, title: v.role ?? originalInvestor.role, from: year, to: null, pending: true }, ...out]
+    }
+    return base.map(s => s.to == null ? { ...s, title: v.role!, pending: true } : s)
+  }, [originalInvestor, profileEdit, year])
+
+  const contacts = useMemo(() => Object.values(b.network.people).filter(p => p.kind === 'contact'), [b])
+  const firstWord = (o: string) => o.toLowerCase().split(/\s+/)[0]
+  const overlaps = (s: Stop) => {
+    const sFrom = s.from ?? 0, sTo = s.to ?? year
+    const out: { p: typeof contacts[number]; title: string; same: boolean; yrs: string }[] = []
+    for (const p of contacts) {
+      for (const q of p.positions) {
+        const same = q.org.toLowerCase() === s.org.toLowerCase()
+        const group = !same && firstWord(q.org) === firstWord(s.org) && firstWord(s.org).length > 3
+        if (!same && !group) continue
+        const a = Math.max(sFrom, q.from ?? 0), z = Math.min(sTo, q.to ?? year)
+        if (z < a) continue
+        out.push({ p, title: q.title, same, yrs: `${a}–${z === year && (q.to == null || s.to == null) ? 'now' : z}` })
+        break
+      }
+    }
+    return out.sort((x, y) => Number(y.same) - Number(x.same))
+  }
+  const edu = originalInvestor.education ?? []
+  const span = (s: Stop) => `${s.from ?? '?'} – ${s.to ?? 'present'}`
+  const yrsAt = (s: Stop) => { const n = (s.to ?? year) - (s.from ?? year); return n <= 0 ? 'this year' : `${n} yr${n > 1 ? 's' : ''}` }
+
+  if (!stops.length && !edu.length) return null
+  return (
+    <div className="pf-journey">
+      <div className="row between" style={{ marginBottom: 8 }}>
+        <h2 className="h2" style={{ margin: 0 }}>Journey</h2>
+        <button className="icon-btn" style={{ width: 28, height: 28 }} onClick={onClose} aria-label="Close journey"><IClose size={15} /></button>
+      </div>
+      <div className="card card-pad">
+        <ol className="jr">
+          {stops.map((s, i) => {
+            const ov = overlaps(s)
+            return (
+              <li key={s.org + s.from + i} className={`jr-stop ${s.to == null ? 'now' : ''} ${s.pending ? 'pending' : ''}`}>
+                <span className="jr-dot" />
+                <div className="row between" style={{ gap: 10, alignItems: 'baseline', flexWrap: 'wrap' }}>
+                  <div>
+                    <span className="strong">{s.org}</span>
+                    {s.pending && <span className="side-insider" style={{ marginLeft: 8 }}>pending</span>}
+                  </div>
+                  <span className="tiny faint num">{span(s)} · {yrsAt(s)}</span>
+                </div>
+                <div className="small muted">{s.title}</div>
+                {ov.length > 0 && (
+                  <div className="jr-people">
+                    <span className="tiny faint">{ov.length === 1 ? 'Overlapped with' : `Overlapped with ${ov.length}`}</span>
+                    {ov.map(o => (
+                      <button key={o.p.id} className="jr-person" onClick={() => openPerson(o.p.id)} title={`${o.title}${o.same ? '' : ' (same group)'} · ${o.yrs}`}>
+                        <Avatar p={o.p} /><span className="tiny">{o.p.name}</span>{!o.same && <span className="tiny faint">· group</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </li>
+            )
+          })}
+          {edu.slice().sort((a, c) => (c.year ?? 0) - (a.year ?? 0)).map(e => (
+            <li key={e.school} className="jr-stop edu">
+              <span className="jr-dot" />
+              <div className="row between" style={{ gap: 10, alignItems: 'baseline' }}>
+                <span className="strong">{e.school}</span>
+                <span className="tiny faint num">{e.year ? `Class of ${e.year}` : ''}</span>
+              </div>
+              <div className="small muted">{e.degree}</div>
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   )

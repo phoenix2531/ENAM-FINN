@@ -56,7 +56,11 @@ export type AlertRules = { volume_multiple: number; volume_lookback: number; pri
 export type Bundle = {
   meta: {
     generated_at: string; today: string
-    investor: { name: string; role: string; fund: string }
+    investor: {
+      name: string; role: string; fund: string
+      positions?: { org: string; title: string; from: string | number | null; to: string | number | null }[]
+      education?: { school: string; degree?: string; year?: number | null }[]
+    }
     llm: { provider: string | null; total_usd: number; calls: number; tasks: { task: string; model: string; n: number; tin: number; tout: number; cost: number }[] }
     counts: { filings: number; stories: number }
   }

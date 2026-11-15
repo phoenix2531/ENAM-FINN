@@ -6,7 +6,7 @@ import { Avatar } from './components/People'
 import { PersonSheet } from './components/PersonSheet'
 import { CalRow } from './components/Cards'
 import { bookToday, Delta, Spark } from './components/Viz'
-import { AppCtx, type Ctx, fromHash, type Route, toHash, useApp } from './ctx'
+import { AppCtx, type Ctx, fromHash, type ProfileEdit, type Route, toHash, useApp } from './ctx'
 import { About } from './screens/About'
 import { Alerts } from './screens/Alerts'
 import { Brief } from './screens/Brief'
@@ -36,6 +36,7 @@ export default function App() {
   const [rules, setRulesState] = usePersisted<AlertRules | null>('rules', null)
   const [called, setCalled] = usePersisted<Record<string, string>>('called', {})
   const [theme, setTheme] = usePersisted<'light' | 'dark' | null>('theme', null)
+  const [profileEdit, setProfileEdit] = usePersisted<ProfileEdit | null>('profile', null)
   const [toastMsg, setToast] = useState<string | null>(null)
   const [isLive, setLive] = useState(live)
 
@@ -79,8 +80,11 @@ export default function App() {
     setLoc(fromHash(to))
   }, [])
 
-  const ctx: Ctx | null = useMemo(() => !b ? null : ({
-    b, now: new Date(b.meta.generated_at), route: loc.route, go, openPerson, openAsk,
+  // Profile edits overlay the snapshot's investor everywhere the app shows it.
+  const view = useMemo(() => !b || !profileEdit ? b : { ...b, meta: { ...b.meta, investor: { ...b.meta.investor, ...profileEdit.values } } }, [b, profileEdit])
+
+  const ctx: Ctx | null = useMemo(() => !b || !view ? null : ({
+    b: view, originalInvestor: b.meta.investor, profileEdit, setProfileEdit, now: new Date(b.meta.generated_at), route: loc.route, go, openPerson, openAsk,
     done: new Set(done),
     toggleDone: (id: string) => setDone(d => d.includes(id) ? d.filter(x => x !== id) : [...d, id]),
     rules: rules ?? b.alert_rules,
@@ -88,7 +92,7 @@ export default function App() {
     called,
     logCall: (id: string) => setCalled(c => ({ ...c, [id]: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) })),
     toast: setToast,
-  }), [b, loc.route, done, rules, called, go, openPerson, openAsk, setDone, setRulesState, setCalled])
+  }), [b, view, profileEdit, setProfileEdit, loc.route, done, rules, called, go, openPerson, openAsk, setDone, setRulesState, setCalled])
 
   if (err) return (
     <div className="screen"><div className="empty">

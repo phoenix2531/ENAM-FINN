@@ -25,6 +25,20 @@ export type Ctx = {
   called: Record<string, string>
   logCall: (id: string) => void
   toast: (msg: string) => void
+  /** The investor's own edits to their profile, each backed by a proof document. */
+  profileEdit: ProfileEdit | null
+  setProfileEdit: (e: ProfileEdit | null) => void
+  /** The profile as shipped in the snapshot, before any edits. */
+  originalInvestor: Bundle['meta']['investor']
+}
+
+export type ProfileField = 'name' | 'role' | 'fund'
+export type Proof = { field: ProfileField; kind: string; file: string; size: number; type: string; sha256: string }
+export type ProfileEdit = {
+  values: Partial<Record<ProfileField, string>>
+  proofs: Proof[]
+  submitted: string
+  status: 'pending' | 'verified'
 }
 
 export const AppCtx = createContext<Ctx | null>(null)

@@ -159,7 +159,7 @@ def snapshot(today: date, workers: int = 3, symbols: list[str] | None = None) ->
         "meta": {
             "generated_at": datetime.now().isoformat(timespec="seconds"),
             "today": today.isoformat(),
-            "investor": {k: net.investor[k] for k in ("name", "role", "fund")},
+            "investor": {k: net.investor.get(k) for k in ("name", "role", "fund", "positions", "education")},
             "llm": {"provider": llm_provider(), **llm.ledger()},
             "counts": {"filings": len(b["routine"]) + sum(len(s["filings"]) for s in b["stories"]),
                        "stories": len(b["stories"])},
