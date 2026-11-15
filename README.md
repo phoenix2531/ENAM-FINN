@@ -7,7 +7,7 @@ FINN is a mobile-first prototype built for the ENAM Founding AI Engineer challen
 and any other NSE ticker, plus a fictional investor's network of 44 people overlaid on real executives
 named in this month's filings.
 
-- **Prototype:** `<deployed link>` · open it on a phone
+- **Prototype:** https://finn-aohg.onrender.com · open it on a phone (the free server may take ~30 s to wake)
 - **Run it locally:** [two commands](#run-it)
 - **Writeup for the covering email:** [docs/covering-note.md](docs/covering-note.md)
 
