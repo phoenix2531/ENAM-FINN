@@ -4,6 +4,8 @@ import type { AlertRules, Bundle } from './types'
 export type Route =
   | { tab: 'brief' }
   | { tab: 'alerts' }
+  | { tab: 'about' }
+  | { tab: 'story'; id: string }
   | { tab: 'research'; symbol?: string; section?: string }
   | { tab: 'network'; theme?: string }
 
@@ -32,6 +34,7 @@ export const useApp = () => {
 
 export function toHash(r: Route): string {
   if (r.tab === 'research' && r.symbol) return `#/research/${r.symbol}${r.section ? `/${r.section}` : ''}`
+  if (r.tab === 'story') return `#/story/${encodeURIComponent(r.id)}`
   if (r.tab === 'network' && r.theme) return `#/network/theme/${encodeURIComponent(r.theme)}`
   return `#/${r.tab}`
 }
@@ -42,6 +45,8 @@ export function fromHash(h: string): { route: Route; person?: string; ask?: stri
   const parts = path.split('/').filter(Boolean)
   let route: Route = { tab: 'brief' }
   if (parts[0] === 'alerts') route = { tab: 'alerts' }
+  else if (parts[0] === 'about') route = { tab: 'about' }
+  else if (parts[0] === 'story' && parts[1]) route = { tab: 'story', id: decodeURIComponent(parts[1]) }
   else if (parts[0] === 'research') route = { tab: 'research', symbol: parts[1]?.toUpperCase(), section: parts[2] }
   else if (parts[0] === 'network') route = { tab: 'network', theme: parts[1] === 'theme' ? decodeURIComponent(parts[2] ?? '') : undefined }
   return { route, person: qs.get('p') ?? undefined, ask: qs.has('ask') ? qs.get('ask') ?? '' : undefined }

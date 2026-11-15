@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { GlanceRow, StoryRow } from '../components/Cards'
+import { useEffect, useMemo, useState } from 'react'
+import { GlanceRow, StoryRow, takeBriefScroll } from '../components/Cards'
 import { IChev, IDoc, ISliders } from '../components/Icons'
 import { bookToday, Delta, Seg, Spark, useCountUp } from '../components/Viz'
 import { useApp } from '../ctx'
@@ -25,7 +25,8 @@ export function Brief() {
   const win = picked ?? (quietToday ? '7d' : '24h')
   const [showRoutine, setShowRoutine] = useState(false)
   const [showAll, setShowAll] = useState(false)
-  const [openId, setOpenId] = useState<string | null>(null)
+  // Coming back from a story: return to where the reader was.
+  useEffect(() => { const y = takeBriefScroll(); if (y) requestAnimationFrame(() => window.scrollTo(0, y)) }, [])
   const hours = WINDOWS.find(w => w.key === win)?.hours ?? 24
   const since = new Date(now.getTime() - hours * 3.6e6)
 
@@ -106,7 +107,7 @@ export function Brief() {
       {act.length > 0 && (
         <div className="card inbox rise" style={{ '--i': 4 } as React.CSSProperties}>
           {(showAll ? act : [...openStories.slice(0, TOP), ...cleared]).map((s, i) => (
-            <StoryRow key={s.id} s={s} i={i} open={openId === s.id} onToggle={() => setOpenId(openId === s.id ? null : s.id)} />
+            <StoryRow key={s.id} s={s} i={i} />
           ))}
           {openStories.length > TOP && (
             <button className="inbox-more" onClick={() => setShowAll(!showAll)}>

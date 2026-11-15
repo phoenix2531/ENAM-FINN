@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { checkLive, live, loadBundle } from './api'
 import { Ask } from './components/Ask'
-import { IBrief, ICheck, IMoon, INetwork, IResearch, ISearch, ISliders, ISun } from './components/Icons'
+import { IAlert, IBrief, ICheck, IMoon, INetwork, IResearch, ISearch, ISliders, ISun } from './components/Icons'
 import { Avatar } from './components/People'
 import { PersonSheet } from './components/PersonSheet'
 import { CalRow } from './components/Cards'
 import { bookToday, Delta, Spark } from './components/Viz'
 import { AppCtx, type Ctx, fromHash, type Route, toHash, useApp } from './ctx'
+import { About } from './screens/About'
 import { Alerts } from './screens/Alerts'
 import { Brief } from './screens/Brief'
 import { Network } from './screens/Network'
 import { Research } from './screens/Research'
+import { StoryPage } from './screens/Story'
+import { allHits } from './signals'
+import { storyTitle } from './insight'
+import { rememberBriefScroll } from './components/Cards'
 import { usePersisted } from './store'
 import type { AlertRules, Bundle } from './types'
 
@@ -93,7 +98,7 @@ export default function App() {
   if (!ctx) return <Loading />
 
   const tab = loc.route.tab
-  const activeTab = tab === 'alerts' ? 'brief' : tab
+  const activeTab = tab === 'alerts' || tab === 'story' ? 'brief' : tab
   const openCount = ctx.b.brief.stories.filter(s => s.tier === 'act' && !ctx.done.has(s.id) && ctx.now.getTime() - new Date(s.published).getTime() <= 168 * 3.6e6).length
   const dark = theme ? theme === 'dark' : typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches
   const themeBtn = (
@@ -107,7 +112,7 @@ export default function App() {
       <div className="shell">
         <aside className="side">
           <div className="side-inner">
-            <button className="brand" onClick={() => go({ tab: 'brief' })}><BrandMark />FINN</button>
+            <button className="brand" onClick={() => go({ tab: 'about' })} aria-label="About FINN" title="About FINN"><BrandMark />FINN</button>
             <nav className="nav">
               {TABS.map(t => (
                 <button key={t.tab} className={`nav-item ${activeTab === t.tab && tab !== 'alerts' ? 'on' : ''}`} onClick={() => go({ tab: t.tab } as Route)}>
@@ -121,6 +126,7 @@ export default function App() {
               </button>
             </nav>
             <SideCalendar />
+            <SideAlerts />
             <div className="side-foot">
               <div className="side-status"><span className={`live-dot ${isLive ? 'on' : ''}`} />{isLive ? 'Live · FINN server' : 'Snapshot'} · {new Date(ctx.b.meta.generated_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
               <div className="me">
@@ -137,7 +143,7 @@ export default function App() {
 
         <div className="main-col">
           <header className="topbar">
-            <button className="brand" onClick={() => go({ tab: 'brief' })} aria-label="FINN home"><BrandMark />FINN</button>
+            <button className="brand" onClick={() => go({ tab: 'about' })} aria-label="About FINN" title="About FINN"><BrandMark />FINN</button>
             <button className="search-trigger" onClick={() => openAsk('')} aria-label="Ask FINN">
               <ISearch size={16} /><span className="ellipsis">Ticker, person, theme…</span><span className="kbd">{isMac ? '⌘K' : '/'}</span>
             </button>
@@ -149,9 +155,11 @@ export default function App() {
           </header>
           <Tape />
 
-          <main key={tab + ((loc.route as { symbol?: string }).symbol ?? '')}>
+          <main key={tab + ((loc.route as { symbol?: string }).symbol ?? '') + ((loc.route as { id?: string }).id ?? '')}>
             {tab === 'brief' && <Brief />}
             {tab === 'alerts' && <Alerts />}
+            {tab === 'about' && <About />}
+            {loc.route.tab === 'story' && <StoryPage id={loc.route.id} />}
             {tab === 'research' && <Research />}
             {tab === 'network' && <Network />}
           </main>
@@ -245,6 +253,53 @@ function SideCalendar() {
       <div className="side-label eyebrow">On the calendar</div>
       <div className="card list side-cal">
         {upcoming.map(u => <CalRow key={u.symbol + u.date} u={u} />)}
+      </div>
+    </>
+  )
+}
+
+/** Left panel: what crossed your alert rules in the last week of sessions, most important first. */
+function SideAlerts() {
+  const { b, rules, go } = useApp()
+  const hits = useMemo(() => {
+    const dates = b.portfolio[0]?.stats.map(s => s.date) ?? []
+    const since = dates[Math.max(0, dates.length - 5)]
+    // Importance: size of the move × position weight; a move no filing explains gets a boost.
+    const score = (h: ReturnType<typeof allHits>[number]) =>
+      (Math.abs(h.ret ?? 0) + Math.min(h.volx ?? 0, 10)) * (1 + h.weight / 5) * (h.story ? 1 : 1.5)
+    return allHits(b, rules, since).sort((a, c) => score(c) - score(a))
+  }, [b, rules])
+  return (
+    <>
+      <div className="side-label eyebrow row between">
+        <span>Important alerts</span>
+        {hits.length > 0 && <span className="side-count num">{hits.length}</span>}
+      </div>
+      <div className="card list side-alerts">
+        {hits.length === 0 && <div className="tiny faint" style={{ padding: '12px' }}>Nothing crossed your rules in the last 5 sessions.</div>}
+        {hits.slice(0, 4).map(h => (
+          <button key={h.symbol + h.date} className="li side-alert"
+            onClick={() => h.story ? (rememberBriefScroll(), go({ tab: 'story', id: h.story.id })) : go({ tab: 'research', symbol: h.symbol })}>
+            <div className="grow" style={{ minWidth: 0 }}>
+              <div className="row" style={{ gap: 6 }}>
+                <span className="sym">{h.symbol}</span>
+                <span className="grow" />
+                <Delta v={h.ret} d={1} pill />
+              </div>
+              <div className="tiny faint" style={{ marginTop: 3 }}>
+                {new Date(h.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                {h.volx != null && h.volx >= rules.volume_multiple ? ` · ${h.volx.toFixed(1)}× vol` : ''}
+              </div>
+              <div className={`tiny ellipsis ${h.story ? 'muted' : 'warn'}`} style={{ marginTop: 3 }}>
+                {h.story ? storyTitle(h.story).title : <><IAlert size={11} /> No filing explains this</>}
+              </div>
+            </div>
+          </button>
+        ))}
+        <button className="li side-alert-more tiny" onClick={() => go({ tab: 'alerts' })}>
+          <span className="grow">{hits.length > 4 ? `+${hits.length - 4} more` : `${rules.volume_multiple}× · ±${rules.price_move_pct}%`}</span>
+          <span className="link">Edit rules</span>
+        </button>
       </div>
     </>
   )
