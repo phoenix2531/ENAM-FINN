@@ -34,7 +34,7 @@
   --r: 14px;
   --r-sm: 9px;
   --ease: cubic-bezier(.2, .8, .2, 1);
-  --side-w: 248px;
+  --side-w: 300px;
   --rail-w: 340px;
   color-scheme: light;
 }
@@ -650,3 +650,37 @@ button.li:hover, a.li:hover { background: color-mix(in srgb, var(--surface-2) 60
 .side-count { font-size: 10.5px; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 7px; letter-spacing: 0; }
 .side-label.row { display: flex; }
 .side-foot { padding-top: 16px; }
+
+/* ---------------------------------------------------------------- profile in the top bar */
+.topbar .search-trigger { margin-right: auto; }
+.show-desk { display: none; }
+.me-top { flex: none; padding: 0; background: none; box-shadow: none; gap: 10px; }
+.me-top .avatar { width: 32px; height: 32px; }
+.me-text { display: none; min-width: 0; max-width: 200px; line-height: 1.25; }
+@media (min-width: 1024px) {
+  .show-desk { display: inline-flex; }
+  .me-top { padding: 4px 12px 4px 4px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+  .me-text { display: block; }
+}
+.me-top { text-align: left; cursor: pointer; transition: box-shadow 0.15s, background 0.15s; }
+.me-top:hover, .me-top.on { box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* ---------------------------------------------------------------- portfolio */
+.pf-head { display: flex; align-items: center; gap: 16px; margin-top: 18px; }
+.pf-head .avatar { width: 56px; height: 56px; font-size: 18px; flex: none; }
+.pf-stats { margin-top: 24px; }
+.pf-mix { display: flex; height: 12px; border-radius: 6px; overflow: hidden; gap: 2px; }
+.pf-legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 20px; margin-top: 14px; }
+.pf-swatch { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.pf-row { display: grid; grid-template-columns: minmax(0, 1fr) 84px 72px 62px 62px 84px 16px; gap: 12px; align-items: center; padding: 11px 16px; width: 100%; text-align: left; }
+.pf-row > :nth-child(n + 3) { text-align: right; justify-self: end; }
+.pf-th { padding-top: 10px; padding-bottom: 8px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; }
+.pf-w { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; width: 100%; }
+.pf-w .wbar { width: 100%; }
+.pf-badge { font-family: var(--mono); font-size: 10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; display: inline-grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+@media (max-width: 640px) {
+  .pf-row { grid-template-columns: minmax(0, 1fr) 64px 58px 60px 14px; gap: 8px; }
+  .pf-spark, .pf-hide { display: none !important; }
+}
+.pf-w .wbar { height: 3px; border-radius: 2px; background: var(--surface-2); overflow: hidden; max-width: 72px; }
+.pf-w .wbar span { display: block; height: 100%; background: var(--accent); }

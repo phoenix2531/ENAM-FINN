@@ -5,6 +5,7 @@ export type Route =
   | { tab: 'brief' }
   | { tab: 'alerts' }
   | { tab: 'about' }
+  | { tab: 'portfolio' }
   | { tab: 'story'; id: string }
   | { tab: 'research'; symbol?: string; section?: string }
   | { tab: 'network'; theme?: string }
@@ -46,6 +47,7 @@ export function fromHash(h: string): { route: Route; person?: string; ask?: stri
   let route: Route = { tab: 'brief' }
   if (parts[0] === 'alerts') route = { tab: 'alerts' }
   else if (parts[0] === 'about') route = { tab: 'about' }
+  else if (parts[0] === 'portfolio') route = { tab: 'portfolio' }
   else if (parts[0] === 'story' && parts[1]) route = { tab: 'story', id: decodeURIComponent(parts[1]) }
   else if (parts[0] === 'research') route = { tab: 'research', symbol: parts[1]?.toUpperCase(), section: parts[2] }
   else if (parts[0] === 'network') route = { tab: 'network', theme: parts[1] === 'theme' ? decodeURIComponent(parts[2] ?? '') : undefined }

@@ -11,6 +11,7 @@ import { About } from './screens/About'
 import { Alerts } from './screens/Alerts'
 import { Brief } from './screens/Brief'
 import { Network } from './screens/Network'
+import { Portfolio } from './screens/Portfolio'
 import { Research } from './screens/Research'
 import { StoryPage } from './screens/Story'
 import { allHits } from './signals'
@@ -129,14 +130,6 @@ export default function App() {
             <SideAlerts />
             <div className="side-foot">
               <div className="side-status"><span className={`live-dot ${isLive ? 'on' : ''}`} />{isLive ? 'Live · FINN server' : 'Snapshot'} · {new Date(ctx.b.meta.generated_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
-              <div className="me">
-                <Avatar p={{ name: ctx.b.meta.investor.name }} />
-                <div className="grow">
-                  <div className="small strong ellipsis">{ctx.b.meta.investor.name}</div>
-                  <div className="tiny faint ellipsis">{ctx.b.meta.investor.role}, {ctx.b.meta.investor.fund}</div>
-                </div>
-                {themeBtn}
-              </div>
             </div>
           </div>
         </aside>
@@ -152,6 +145,14 @@ export default function App() {
               <span className={`live-dot ${isLive ? 'on' : ''}`} title={isLive ? 'Connected to the FINN server' : 'Static snapshot'} />
               {themeBtn}
             </span>
+            <span className="show-desk">{themeBtn}</span>
+            <button className={`me me-top ${tab === 'portfolio' ? 'on' : ''}`} onClick={() => go({ tab: 'portfolio' })} aria-label="Your portfolio" title="Your portfolio">
+              <Avatar p={{ name: ctx.b.meta.investor.name }} />
+              <div className="me-text">
+                <div className="small strong ellipsis">{ctx.b.meta.investor.name}</div>
+                <div className="tiny faint ellipsis">{ctx.b.meta.investor.role}, {ctx.b.meta.investor.fund}</div>
+              </div>
+            </button>
           </header>
           <Tape />
 
@@ -159,6 +160,7 @@ export default function App() {
             {tab === 'brief' && <Brief />}
             {tab === 'alerts' && <Alerts />}
             {tab === 'about' && <About />}
+            {tab === 'portfolio' && <Portfolio />}
             {loc.route.tab === 'story' && <StoryPage id={loc.route.id} />}
             {tab === 'research' && <Research />}
             {tab === 'network' && <Network />}
