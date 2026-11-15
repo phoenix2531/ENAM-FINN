@@ -100,7 +100,14 @@ if DIST.exists():
 
     @app.get("/{path:path}")
     def spa(path: str):
-        f = DIST / path
-        if path and f.is_file():
-            return FileResponse(f)
-        return FileResponse(DIST / "index.html")
+        return FileResponse(spa_file(path))
+
+
+def spa_file(path: str, dist: Path = DIST) -> Path:
+    """The built file for `path`, or index.html. The path arrives URL-decoded,
+    so `%2e%2e/` is a real `../`: anything resolving outside dist falls back."""
+    root = dist.resolve()
+    f = (root / path).resolve()
+    if path and f.is_file() and f.is_relative_to(root):
+        return f
+    return root / "index.html"

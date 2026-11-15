@@ -4,3 +4,4 @@ frontend/dist
 data/cache
 data/finn.db*
 .git
+.env

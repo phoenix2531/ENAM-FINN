@@ -224,3 +224,16 @@ def test_npa_borrowed_from_standalone_when_consolidated_is_empty():
                              None, None, None, None, None, [], [], [], None, "")
     screener._borrow_npa(cons, stand)
     assert cons.quarters.series("gross_npa") == [1.2, 1.1]
+
+
+def test_spa_fallback_never_leaves_dist(tmp_path):
+    from finn.api import spa_file
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "index.html").write_text("app")
+    (dist / "icon.svg").write_text("svg")
+    (tmp_path / ".env").write_text("SECRET=1")
+    assert spa_file("icon.svg", dist) == (dist / "icon.svg").resolve()
+    assert spa_file("", dist).name == "index.html"
+    for evil in ("../.env", "../../.env", str(tmp_path / ".env")):
+        assert spa_file(evil, dist).name == "index.html"
