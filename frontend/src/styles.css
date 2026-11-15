@@ -684,3 +684,64 @@ button.li:hover, a.li:hover { background: color-mix(in srgb, var(--surface-2) 60
 }
 .pf-w .wbar { height: 3px; border-radius: 2px; background: var(--surface-2); overflow: hidden; max-width: 72px; }
 .pf-w .wbar span { display: block; height: 100%; background: var(--accent); }
+
+/* friends */
+.fr-row { display: grid; grid-template-columns: 18px 36px minmax(0, 1fr) 170px 64px 14px; gap: 12px; align-items: center; padding: 12px 16px; text-align: left; }
+.fr-rank { text-align: right; }
+.fr-freq { display: flex; flex-direction: column; gap: 5px; }
+.fr-bar { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+.fr-bar span { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.fr-last { text-align: right; font-family: var(--mono); }
+@media (max-width: 640px) {
+  .fr-row { grid-template-columns: 36px minmax(0, 1fr) 84px 14px; gap: 10px; }
+  .fr-rank, .fr-last { display: none; }
+  .fr-cad { display: none; }
+}
+.fr-c { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 14px; text-align: left; }
+.fr-c .avatar { width: 32px; height: 32px; }
+
+/* portfolio: two columns (holdings | friends) on wide screens; the global right rail steps aside */
+.shell.no-rail .book-rail { display: none !important; }
+@media (min-width: 1024px) { .shell.no-rail { grid-template-columns: var(--side-w) minmax(0, 1fr); } }
+.pf-aside { display: none; }
+.pf-compact-top { margin-top: 0; }
+@media (min-width: 1180px) {
+  .pf-screen { max-width: 1240px; }
+  .pf-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 28px; align-items: start; }
+  .pf-below { display: none; }
+  .pf-aside { display: block; position: sticky; top: 76px; margin-top: 44px; max-height: calc(100dvh - 96px); overflow-y: auto; scrollbar-width: thin; }
+}
+@media (min-width: 1180px) and (max-width: 1499px) {
+  .pf-grid .pf-row { grid-template-columns: minmax(0, 1fr) 72px 62px 62px 84px 16px; }
+  .pf-grid .pf-spark { display: none !important; }
+}
+
+/* sidebar: friends to call (people are always blue) */
+.side-calls { flex: none; box-shadow: var(--shadow-sm), inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.side-call { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px 10px 14px; text-align: left; position: relative; }
+.side-call::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.side-call .avatar { width: 28px; height: 28px; font-size: 10.5px; flex: none; margin-top: 1px; }
+.side-call .delta.pill { font-size: 11px; }
+.side-call-org { color: var(--accent); font-weight: 500; margin-top: 1px; }
+.side-insider { margin-left: 6px; font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); border-radius: 4px; padding: 0 4px; }
+
+/* sidebar footers that link to the full list */
+.side-label button { font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; }
+.side-label button:hover { color: var(--ink); }
+.side-more { text-align: left; color: var(--ink-3); font-family: var(--mono); }
+.side-more:hover { color: var(--accent); }
+button.side-alert-more { width: 100%; }
+
+/* full alerts page */
+.ib-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto 14px; gap: 12px; align-items: center; padding: 13px 16px; text-align: left; }
+.ib-rank { text-align: right; }
+.ib-calls { display: flex; flex-direction: column; gap: 12px; }
+.ib-call { background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow-sm), inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, var(--line)); overflow: hidden; position: relative; }
+.ib-call::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+.ib-call-head { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; text-align: left; }
+.ib-call-head:hover { background: var(--surface-2); }
+.ib-reasons { border-top: 1px solid var(--line); }
+.ib-reason { display: grid; grid-template-columns: minmax(0, 1fr) auto 14px; gap: 12px; align-items: center; width: 100%; padding: 10px 16px 10px 64px; text-align: left; }
+.ib-reason + .ib-reason { border-top: 1px dashed var(--line); }
+.ib-reason:hover { background: var(--surface-2); }
+@media (max-width: 640px) { .ib-reason { padding-left: 16px; } }

@@ -1,6 +1,6 @@
 // Shapes produced by backend/finn/pipeline.py (snapshot) and finn/api.py (live).
 
-export type Tie = { score: number; label: 'strong' | 'medium' | 'weak'; how: string; last: string }
+export type Tie = { score: number; label: 'strong' | 'medium' | 'weak'; how: string; last: string; touches_12m?: number; last_contact?: string | null }
 export type PersonCard = { id: string; name: string; headline: string; city: string; kind: 'contact' | 'public' }
 export type Link = { kind: 'worked' | 'studied'; confidence: 'confirmed' | 'likely' | 'possible'; strength: number; text: string }
 export type Path = { contact: PersonCard; tie: Tie; links: Link[]; score: number; label: 'strong' | 'medium' | 'weak' }

@@ -301,7 +301,8 @@ class Network:
         label = "strong" if score >= 0.6 else "medium" if score >= 0.4 else "weak"
         how = r.get("context", "")
         when = "" if m is None else (f"spoke {int(m)} months ago" if m >= 1.5 else "spoke recently")
-        return {"score": score, "label": label, "how": how, "last": when}
+        return {"score": score, "label": label, "how": how, "last": when,
+                "touches_12m": r.get("touches_12m", 0), "last_contact": r.get("last_contact")}
 
     # ---------------------------------------------------------- person-to-person links
     def _overlap(self, a: Position, b: Position) -> tuple[str, float | None]:

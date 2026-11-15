@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { IAlert, IBack, IChev } from '../components/Icons'
 import { Avatar } from '../components/People'
-import { bookToday, Delta, hue, Spark } from '../components/Viz'
+import { bookToday, Delta, hue, Spark, Tie } from '../components/Viz'
 import { useApp } from '../ctx'
 import { hitsFor } from '../signals'
 import type { Holding } from '../types'
@@ -67,7 +67,7 @@ export function Portfolio() {
   const sectorColor = (s: string) => `oklch(0.66 0.13 ${GROUP_HUE[s] ?? hue(s)})`
 
   return (
-    <div className="screen">
+    <div className="screen pf-screen">
       <button className="back" onClick={() => history.length > 1 ? history.back() : go({ tab: 'brief' })}><IBack size={17} /> Back</button>
 
       <div className="pf-head">
@@ -102,6 +102,8 @@ export function Portfolio() {
         </div>
       </div>
 
+      <div className="pf-grid">
+      <div className="pf-main">
       <div className="section">
         <h2 className="h2">Sector mix</h2>
         <div className="card card-pad">
@@ -160,6 +162,96 @@ export function Portfolio() {
           Weights are share of the fund. A number next to a ticker counts stories open in the Brief this week; <span className="warn"><IAlert size={11} /></span> means it crossed your alert rules in the last 5 sessions.
         </p>
       </div>
+
+      {/* Narrow screens: Friends below the holdings. */}
+      <div className="pf-below"><Friends /></div>
+      </div>
+
+      {/* Wide screens: Friends beside the holdings. */}
+      <aside className="pf-aside"><Friends compact /></aside>
+      </div>
+    </div>
+  )
+}
+
+/** How often you talk, in words. */
+const cadence = (n: number) =>
+  n >= 10 ? 'Monthly' : n >= 6 ? 'Every 2 months' : n >= 4 ? 'Every quarter' : n >= 2 ? 'A few times a year' : n === 1 ? 'Once this year' : 'Not this year'
+
+/** Friends: the investor's own contacts, most-talked-to first. */
+export function Friends({ compact }: { compact?: boolean }) {
+  const { b, openPerson } = useApp()
+  const [all, setAll] = useState(false)
+  const today = new Date(b.meta.today).getTime()
+  const friends = useMemo(() => Object.values(b.network.people)
+    .filter(p => p.kind === 'contact' && p.tie)
+    .map(p => {
+      const t = p.tie!
+      const n = t.touches_12m ?? 0
+      const days = t.last_contact ? Math.round((today - new Date(t.last_contact).getTime()) / 864e5) : null
+      // Overdue: silent for over 1.5× your usual gap with them.
+      const gap = n ? 365 / n : null
+      return { p, n, days, overdue: gap != null && days != null && days > gap * 1.5 }
+    })
+    .sort((a, c) => c.n - a.n || (a.days ?? 1e9) - (c.days ?? 1e9)), [b, today])
+  const top = compact ? 12 : 10
+  const shown = all ? friends : friends.slice(0, top)
+  const max = Math.max(...friends.map(f => f.n), 1)
+  const ago = (d: number | null) => d == null ? '–' : d < 14 ? `${d}d ago` : d < 60 ? `${Math.round(d / 7)}w ago` : `${Math.round(d / 30.4)}mo ago`
+
+  return (
+    <div className={compact ? 'fr-compact' : 'section'}>
+      <div className={compact ? 'card-head' : 'section-head'} style={compact ? { padding: '0 4px 10px' } : undefined}>
+        <h2 className="h2">Friends <span className="count num">{friends.length}</span></h2>
+        <span className="tiny faint">{compact ? 'by how often you talk' : 'by how often you talk · last 12 months'}</span>
+      </div>
+      <div className="card list">
+        {shown.map(({ p, n, days, overdue }, i) => compact ? (
+          <button key={p.id} className="li fr-c" onClick={() => openPerson(p.id)}>
+            <Avatar p={p} />
+            <div style={{ minWidth: 0 }}>
+              <div className="row" style={{ gap: 6 }}>
+                <span className="small strong ellipsis">{p.name}</span>
+                <Tie tie={p.tie} />
+              </div>
+              <div className="tiny muted"><span className="num strong">{n}×</span> {cadence(n)}</div>
+              <div className="fr-bar" style={{ marginTop: 5 }}><span style={{ width: `${(n / max) * 100}%` }} /></div>
+            </div>
+            <div className="fr-last tiny">
+              <div className={overdue ? 'warn' : 'faint'}>{ago(days)}</div>
+              {overdue && <div className="warn" style={{ fontSize: 10 }}>due a call</div>}
+            </div>
+          </button>
+        ) : (
+          <button key={p.id} className="li fr-row" onClick={() => openPerson(p.id)}>
+            <span className="fr-rank num tiny faint">{i + 1}</span>
+            <Avatar p={p} />
+            <div style={{ minWidth: 0 }}>
+              <div className="row" style={{ gap: 8 }}>
+                <span className="strong ellipsis" style={{ fontSize: 14.5 }}>{p.name}</span>
+                <Tie tie={p.tie} />
+              </div>
+              <div className="tiny muted ellipsis">{p.headline}</div>
+              {p.tie?.how && <div className="tiny faint ellipsis">{p.tie.how}</div>}
+            </div>
+            <div className="fr-freq">
+              <div className="small"><span className="num strong">{n}×</span> <span className="muted fr-cad">{cadence(n)}</span></div>
+              <div className="fr-bar"><span style={{ width: `${(n / max) * 100}%` }} /></div>
+            </div>
+            <div className="fr-last tiny">
+              <div className={overdue ? 'warn' : 'faint'}>{ago(days)}</div>
+              {overdue && <div className="warn" style={{ fontSize: 10.5 }}>due a call</div>}
+            </div>
+            <span className="chev"><IChev size={15} /></span>
+          </button>
+        ))}
+        {friends.length > top && (
+          <button className="inbox-more" onClick={() => setAll(!all)}>{all ? 'Show fewer' : `Show all ${friends.length}`}</button>
+        )}
+      </div>
+      <p className="hint" style={{ marginTop: 10, padding: compact ? '0 4px' : undefined }}>
+        Ranked by conversations in the last 12 months, then by how recently you spoke. <span className="warn">Due a call</span> means it has been more than 1.5× your usual gap with them.
+      </p>
     </div>
   )
 }

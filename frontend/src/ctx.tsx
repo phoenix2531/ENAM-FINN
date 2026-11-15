@@ -6,6 +6,7 @@ export type Route =
   | { tab: 'alerts' }
   | { tab: 'about' }
   | { tab: 'portfolio' }
+  | { tab: 'inbox'; kind: 'moves' | 'friends' }
   | { tab: 'story'; id: string }
   | { tab: 'research'; symbol?: string; section?: string }
   | { tab: 'network'; theme?: string }
@@ -35,6 +36,7 @@ export const useApp = () => {
 
 export function toHash(r: Route): string {
   if (r.tab === 'research' && r.symbol) return `#/research/${r.symbol}${r.section ? `/${r.section}` : ''}`
+  if (r.tab === 'inbox') return `#/inbox/${r.kind}`
   if (r.tab === 'story') return `#/story/${encodeURIComponent(r.id)}`
   if (r.tab === 'network' && r.theme) return `#/network/theme/${encodeURIComponent(r.theme)}`
   return `#/${r.tab}`
@@ -48,6 +50,7 @@ export function fromHash(h: string): { route: Route; person?: string; ask?: stri
   if (parts[0] === 'alerts') route = { tab: 'alerts' }
   else if (parts[0] === 'about') route = { tab: 'about' }
   else if (parts[0] === 'portfolio') route = { tab: 'portfolio' }
+  else if (parts[0] === 'inbox') route = { tab: 'inbox', kind: parts[1] === 'friends' ? 'friends' : 'moves' }
   else if (parts[0] === 'story' && parts[1]) route = { tab: 'story', id: decodeURIComponent(parts[1]) }
   else if (parts[0] === 'research') route = { tab: 'research', symbol: parts[1]?.toUpperCase(), section: parts[2] }
   else if (parts[0] === 'network') route = { tab: 'network', theme: parts[1] === 'theme' ? decodeURIComponent(parts[2] ?? '') : undefined }

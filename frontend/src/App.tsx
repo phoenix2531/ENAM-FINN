@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { checkLive, live, loadBundle } from './api'
 import { Ask } from './components/Ask'
-import { IAlert, IBrief, ICheck, IMoon, INetwork, IResearch, ISearch, ISliders, ISun } from './components/Icons'
+import { IBrief, ICheck, IMoon, INetwork, IResearch, ISearch, ISliders, ISun } from './components/Icons'
 import { Avatar } from './components/People'
 import { PersonSheet } from './components/PersonSheet'
 import { CalRow } from './components/Cards'
@@ -13,10 +13,10 @@ import { Brief } from './screens/Brief'
 import { Network } from './screens/Network'
 import { Portfolio } from './screens/Portfolio'
 import { Research } from './screens/Research'
+import { Inbox } from './screens/Inbox'
 import { StoryPage } from './screens/Story'
-import { allHits } from './signals'
-import { storyTitle } from './insight'
-import { rememberBriefScroll } from './components/Cards'
+import { friendsToCall, importantAlerts } from './alertLists'
+import { CallAlert, MoveAlert } from './screens/Inbox'
 import { usePersisted } from './store'
 import type { AlertRules, Bundle } from './types'
 
@@ -99,7 +99,7 @@ export default function App() {
   if (!ctx) return <Loading />
 
   const tab = loc.route.tab
-  const activeTab = tab === 'alerts' || tab === 'story' ? 'brief' : tab
+  const activeTab = tab === 'alerts' || tab === 'story' || tab === 'inbox' ? 'brief' : tab
   const openCount = ctx.b.brief.stories.filter(s => s.tier === 'act' && !ctx.done.has(s.id) && ctx.now.getTime() - new Date(s.published).getTime() <= 168 * 3.6e6).length
   const dark = theme ? theme === 'dark' : typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches
   const themeBtn = (
@@ -110,7 +110,7 @@ export default function App() {
 
   return (
     <AppCtx.Provider value={ctx}>
-      <div className="shell">
+      <div className={`shell ${tab === 'portfolio' ? 'no-rail' : ''}`}>
         <aside className="side">
           <div className="side-inner">
             <button className="brand" onClick={() => go({ tab: 'about' })} aria-label="About FINN" title="About FINN"><BrandMark />FINN</button>
@@ -128,6 +128,7 @@ export default function App() {
             </nav>
             <SideCalendar />
             <SideAlerts />
+            <SideCallFriends />
             <div className="side-foot">
               <div className="side-status"><span className={`live-dot ${isLive ? 'on' : ''}`} />{isLive ? 'Live · FINN server' : 'Snapshot'} · {new Date(ctx.b.meta.generated_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
             </div>
@@ -161,6 +162,7 @@ export default function App() {
             {tab === 'alerts' && <Alerts />}
             {tab === 'about' && <About />}
             {tab === 'portfolio' && <Portfolio />}
+            {loc.route.tab === 'inbox' && <Inbox kind={loc.route.kind} />}
             {loc.route.tab === 'story' && <StoryPage id={loc.route.id} />}
             {tab === 'research' && <Research />}
             {tab === 'network' && <Network />}
@@ -263,44 +265,42 @@ function SideCalendar() {
 /** Left panel: what crossed your alert rules in the last week of sessions, most important first. */
 function SideAlerts() {
   const { b, rules, go } = useApp()
-  const hits = useMemo(() => {
-    const dates = b.portfolio[0]?.stats.map(s => s.date) ?? []
-    const since = dates[Math.max(0, dates.length - 5)]
-    // Importance: size of the move × position weight; a move no filing explains gets a boost.
-    const score = (h: ReturnType<typeof allHits>[number]) =>
-      (Math.abs(h.ret ?? 0) + Math.min(h.volx ?? 0, 10)) * (1 + h.weight / 5) * (h.story ? 1 : 1.5)
-    return allHits(b, rules, since).sort((a, c) => score(c) - score(a))
-  }, [b, rules])
+  const hits = useMemo(() => importantAlerts(b, rules), [b, rules])
   return (
     <>
       <div className="side-label eyebrow row between">
-        <span>Important alerts</span>
+        <button onClick={() => go({ tab: 'inbox', kind: 'moves' })}>Important alerts</button>
         {hits.length > 0 && <span className="side-count num">{hits.length}</span>}
       </div>
       <div className="card list side-alerts">
         {hits.length === 0 && <div className="tiny faint" style={{ padding: '12px' }}>Nothing crossed your rules in the last 5 sessions.</div>}
-        {hits.slice(0, 4).map(h => (
-          <button key={h.symbol + h.date} className="li side-alert"
-            onClick={() => h.story ? (rememberBriefScroll(), go({ tab: 'story', id: h.story.id })) : go({ tab: 'research', symbol: h.symbol })}>
-            <div className="grow" style={{ minWidth: 0 }}>
-              <div className="row" style={{ gap: 6 }}>
-                <span className="sym">{h.symbol}</span>
-                <span className="grow" />
-                <Delta v={h.ret} d={1} pill />
-              </div>
-              <div className="tiny faint" style={{ marginTop: 3 }}>
-                {new Date(h.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                {h.volx != null && h.volx >= rules.volume_multiple ? ` · ${h.volx.toFixed(1)}× vol` : ''}
-              </div>
-              <div className={`tiny ellipsis ${h.story ? 'muted' : 'warn'}`} style={{ marginTop: 3 }}>
-                {h.story ? storyTitle(h.story).title : <><IAlert size={11} /> No filing explains this</>}
-              </div>
-            </div>
+        {hits.slice(0, 4).map(h => <MoveAlert key={h.symbol + h.date} h={h} compact />)}
+        <div className="row side-alert-more tiny">
+          <button className="grow side-more" onClick={() => go({ tab: 'inbox', kind: 'moves' })}>
+            {hits.length > 4 ? `+${hits.length - 4} more →` : 'See all →'}
           </button>
-        ))}
-        <button className="li side-alert-more tiny" onClick={() => go({ tab: 'alerts' })}>
-          <span className="grow">{hits.length > 4 ? `+${hits.length - 4} more` : `${rules.volume_multiple}× · ±${rules.price_move_pct}%`}</span>
-          <span className="link">Edit rules</span>
+          <button className="link" onClick={() => go({ tab: 'alerts' })}>Edit rules</button>
+        </div>
+      </div>
+    </>
+  )
+}
+
+/** Left panel: friends worth a call because their current or former employer just moved or filed. */
+function SideCallFriends() {
+  const { b, now, rules, go } = useApp()
+  const picks = useMemo(() => friendsToCall(b, rules, now), [b, rules, now])
+  if (!picks.length) return null
+  return (
+    <>
+      <div className="side-label eyebrow row between">
+        <button onClick={() => go({ tab: 'inbox', kind: 'friends' })}>Friends to call</button>
+        <span className="side-count num">{picks.length}</span>
+      </div>
+      <div className="card list side-calls">
+        {picks.slice(0, 4).map(c => <CallAlert key={c.p.id} c={c} compact />)}
+        <button className="side-alert-more side-more tiny" onClick={() => go({ tab: 'inbox', kind: 'friends' })}>
+          {picks.length > 4 ? `+${picks.length - 4} more with a reason to call →` : 'See all →'}
         </button>
       </div>
     </>
