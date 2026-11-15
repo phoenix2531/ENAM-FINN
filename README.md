@@ -12,10 +12,18 @@ named in this month's filings.
 - **Writeup for the covering email:** [docs/covering-note.md](docs/covering-note.md)
 
 <p align="center">
-  <img src="docs/screens/brief.png" width="24%" />
-  <img src="docs/screens/management.png" width="24%" />
-  <img src="docs/screens/promises.png" width="24%" />
-  <img src="docs/screens/network.png" width="24%" />
+  <img src="docs/screens/brief.png" width="24%" alt="Brief" />
+  <img src="docs/screens/story.png" width="24%" alt="A story with its price chart" />
+  <img src="docs/screens/promises.png" width="24%" alt="Promised vs delivered" />
+  <img src="docs/screens/friends.png" width="24%" alt="Friends to call" />
+</p>
+<p align="center">
+  <img src="docs/screens/management.png" width="24%" alt="Your way in to a new CEO" />
+  <img src="docs/screens/network.png" width="24%" alt="Network" />
+  <img src="docs/screens/portfolio.png" width="24%" alt="Portfolio" />
+</p>
+<p align="center">
+  <img src="docs/screens/desktop.png" width="98%" alt="Desktop: alerts and friends to call in the sidebar" />
 </p>
 
 ---
@@ -24,12 +32,15 @@ named in this month's filings.
 
 1. **Brief.** The last day was quiet, so FINN opens on the week: "8 things need you." Cards are ranked by materiality × position size, and each one shows how the stock reacted.
 2. **HDFC Bank: new MD & CEO** (switch to *Month*, or tap the first item under *Network → Noticed*). FINN reads the filing, attaches a verified profile of Anup Bagchi, and finds your way in: *Vikram Rao, your IIT batchmate, was at ICICI Securities 2011–16 while Bagchi ran it.*
-3. **PI Industries: results.** Revenue, EBITDA, PBT and PAT, QoQ and YoY, from the filing. The card also notes that *other income is 35% of PBT* and that the stock fell 19% on 30× volume the next session.
+3. **PI Industries: results.** Tap the card and it opens as its own page, led by an interactive price chart (hover or drag to read a day, 1M/3M/All, volume bars, the filing day marked). Below it: Revenue, EBITDA, PBT and PAT, QoQ and YoY, from the filing, a note that *other income is 35% of PBT*, and the −19% next session on 30× volume. *Back* returns you to the same place in the Brief.
 4. **CG Power: plant closure order.** *Call Sameer Joshi: he ran the Waluj plant 2013–20.* He's ranked first because the event names his site.
 5. **Research → Kaynes → Promised vs delivered.** Management credibility: **low**. They promised ≥ ₹4,000 cr FY26 revenue and delivered ₹3,626 cr; they promised positive operating cash and posted −₹600 cr. Every row links to the transcript page it came from.
 6. **Network.** What it noticed: paths to new directors, reasons to reconnect, a Kaynes trading-window caution, and themes you own with thin coverage.
 7. **Ask** (search icon, or `/`): "way in to Anup Bagchi", "who knows rural lending?", "who can explain Polycab?", or any ticker. Voice works on supported browsers.
 8. **Alerts** (tap the thresholds next to *Unusual moves* on the Brief). Drag the volume/price thresholds and watch the noise check update: how many alerts you would have had over the last 90 sessions.
+9. **Friends to call** (desktop sidebar, or *+N more* for the full list). Friends whose current or former employer just crossed your alert rules or filed something material: *Manish Gupta, ex-PI Industries: profit down 70%*. Current employees are tagged **insider**.
+10. **Portfolio** (tap your name, top right). Returns, sector mix and holdings flagged with open stories and alerts; **Friends** ranked by how often you actually talk, with a *due a call* flag when someone has gone quiet for longer than usual; your **Journey** of firms with the friends you overlapped with at each; and **Edit profile**, where every change needs a proof document.
+11. **About** (tap the FINN logo): the features on one page, with links into each.
 
 ---
 
@@ -77,6 +88,8 @@ One rule decides every pixel: **each block opens with its conclusion, and that c
 | **Signals** | End-of-day price and volume vs a 20-session average, against your thresholds. Each signal is linked to the filing that explains it, or flagged *"No filing explains this move"*, which is itself worth knowing. |
 | **Market reaction** | Every story shows the first session after the filing (after-close filings roll to the next day). |
 | **Compliance sense** | A company that filed "trading window closed until results" gets a caution: *don't call current insiders until 14 Nov.* Anyone currently employed at the company is tagged with a SEBI insider-trading reminder. |
+| **Story page** | Each story opens on its own page: an interactive price chart with the filing day marked, the results or the person, every filing in the story, and actions (mark done, filing, research). Deep-linkable. |
+| **Important alerts** | On wide screens the sidebar keeps the most important moves in view, ranked by move × position weight with unexplained moves boosted; the full list is one tap away. |
 
 ### Pull: ask it to dig in
 
@@ -96,6 +109,9 @@ Works for **any NSE ticker** screener.in covers. Not hard-wired: point it at a c
 - **Tie strength:** relationship type × recency (halves each year of silence) + frequency.
 - **Who should I call:** former insiders first (fresher is better), then competitors, value chain, and topical experts (lawyers for insolvency, ex-regulator for a pollution order, ECM banker for a QIP). Weighted by function fit for the event and your tie.
 - **Scenarios built:** second-degree paths to new executives; diligence on people (career, sources, paths); an expertise map with blind spots weighted by position size; going-cold contacts with a reason to call; a drafted note you can copy into WhatsApp; logging a call.
+- **Friends to call:** every contact's listed employers, current and former, are matched against this week's alerts and material stories. Ranked by the size of the move, whether a filing explains it, and your tie. Former staff rank as the safer call; current staff carry an insider tag.
+- **Friends by frequency:** on the portfolio page, contacts are ordered by conversations in the last 12 months, with their usual cadence and a *due a call* flag at more than 1.5× their normal gap.
+- **Your own journey:** the investor's firms and schools as a timeline, showing which contacts overlapped at each (same firm, or same group, labelled as such).
 
 ---
 
@@ -188,7 +204,8 @@ The network is the sensitive part, so it is designed as **one investor's private
 - **Consent.** The investor imports their own data (LinkedIn's member data export, calendar OAuth with read-only scope). Enriching a contact's profile beyond what the investor supplied would require that contact's consent or a licensed provider with a lawful basis under India's DPDP Act.
 - **Access control.** SSO with MFA, per-workspace roles (owner, analyst, read-only), audit logs on every network query and export. Production keys live in a secrets manager.
 - **Compliance by design.** Insider-trading cautions on current employees and trading windows are built into the product, not left to memory.
-- **In the prototype:** the network is fictional and ships as JSON; per-viewer state (cleared cards, thresholds, logged calls) stays in the browser's localStorage.
+- **In the prototype:** the network is fictional and ships as JSON; per-viewer state (cleared cards, thresholds, logged calls, profile edits) stays in the browser's localStorage.
+- **Profile edits need proof.** Changing your name needs a government ID; changing role or firm needs proof of employment. The prototype only fingerprints the document (SHA-256) in the browser and marks the change *verification pending*; the file itself is never uploaded. In production the document would go to a reviewer or an employment-verification provider, be kept only until verified, then deleted.
 
 ### Cloud: what runs where
 
@@ -242,7 +259,7 @@ cd frontend && npm install && npm run dev                  # http://localhost:51
 ```
 
 - With `LLM_API_KEY` (a free Gemini key from aistudio.google.com) set, new tickers get the model sections too; without it they render the computed sections and say what is missing.
-- Tests: `cd backend && ../.venv/bin/python -m pytest` (31 tests over the classifier, materiality, money parsing, results arithmetic, the overlap engine and the flags).
+- Tests: `cd backend && ../.venv/bin/pip install pytest && ../.venv/bin/python -m pytest` (38 tests over the classifier, materiality, money parsing, results arithmetic, the overlap engine and the flags).
 - Docker: `docker build -t finn . && docker run -p 8000:8000 finn`.
 
 ## Repository map
@@ -259,6 +276,8 @@ backend/tests/  deterministic core
 data/inputs/    portfolio + the investor's network (synthetic) + verified public profiles
 data/snapshot/  the JSON the app runs on · data/llm_cache.jsonl  every model answer, reusable
 frontend/src/   React + TypeScript, no UI kit, hand-built SVG charts
+  screens/      Brief, Story, Research/Dossier, Network, Portfolio, Inbox (all alerts), Alerts (rules), About
+  alertLists.ts one ranking for important alerts and friends to call, shared by sidebar and full page
 ```
 
 ## How this was built
