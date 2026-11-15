@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { checkLive, live, loadBundle } from './api'
 import { Ask } from './components/Ask'
-import { IBrief, ICheck, IMoon, INetwork, IResearch, ISearch, ISliders, ISun } from './components/Icons'
+import { IBrief, ICheck, IClose, IMenu, IUser, IMoon, INetwork, IResearch, ISearch, ISliders, ISun } from './components/Icons'
 import { Avatar } from './components/People'
 import { PersonSheet } from './components/PersonSheet'
 import { CalRow } from './components/Cards'
@@ -39,6 +39,7 @@ export default function App() {
   const [profileEdit, setProfileEdit] = usePersisted<ProfileEdit | null>('profile', null)
   const [toastMsg, setToast] = useState<string | null>(null)
   const [isLive, setLive] = useState(live)
+  const [drawer, setDrawer] = useState(false)
 
   useEffect(() => { loadBundle().then(setB).catch(e => setErr(String(e))); checkLive().then(setLive) }, [])
   useEffect(() => {
@@ -58,6 +59,14 @@ export default function App() {
     window.addEventListener('keydown', key)
     return () => { window.removeEventListener('hashchange', on); window.removeEventListener('keydown', key) }
   }, [])
+  useEffect(() => { setDrawer(false) }, [loc])
+  useEffect(() => {
+    if (!drawer) return
+    const k = (e: KeyboardEvent) => e.key === 'Escape' && setDrawer(false)
+    window.addEventListener('keydown', k)
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', k); document.body.style.overflow = '' }
+  }, [drawer])
   useEffect(() => { if (!toastMsg) return; const t = setTimeout(() => setToast(null), 2600); return () => clearTimeout(t) }, [toastMsg])
   useEffect(() => {
     if (theme) document.documentElement.dataset.theme = theme
@@ -141,7 +150,10 @@ export default function App() {
 
         <div className="main-col">
           <header className="topbar">
-            <button className="brand" onClick={() => go({ tab: 'about' })} aria-label="About FINN" title="About FINN"><BrandMark />FINN</button>
+            <button className="icon-btn menu-btn" onClick={() => setDrawer(true)} aria-label="Calendar and alerts" aria-expanded={drawer}>
+              <IMenu size={20} />
+            </button>
+            <button className="brand" onClick={() => go({ tab: 'about' })} aria-label="About FINN" title="About FINN"><BrandMark /><span className="brand-word">FINN</span></button>
             <button className="search-trigger" onClick={() => openAsk('')} aria-label="Ask FINN">
               <ISearch size={16} /><span className="ellipsis">Ticker, person, theme…</span><span className="kbd">{isMac ? '⌘K' : '/'}</span>
             </button>
@@ -184,6 +196,27 @@ export default function App() {
           </button>
         ))}
       </nav>
+
+      {drawer && (
+        <>
+          <div className="scrim drawer-scrim" onClick={() => setDrawer(false)} />
+          <aside className="drawer" role="dialog" aria-modal aria-label="Calendar and alerts">
+            <div className="drawer-head">
+              <span className="brand"><BrandMark />FINN</span>
+              <button className="icon-btn" onClick={() => setDrawer(false)} aria-label="Close"><IClose size={18} /></button>
+            </div>
+            <SideCalendar />
+            <SideAlerts />
+            <SideCallFriends />
+            <div className="side-label eyebrow">More</div>
+            <div className="card list">
+              <button className="li drawer-link" onClick={() => go({ tab: 'alerts' })}><ISliders size={17} />Alert rules</button>
+              <button className="li drawer-link" onClick={() => go({ tab: 'portfolio' })}><IUser size={17} />Your portfolio</button>
+              <button className="li drawer-link" onClick={() => go({ tab: 'about' })}><IBrief size={17} />About FINN</button>
+            </div>
+          </aside>
+        </>
+      )}
 
       {loc.person && <PersonSheet id={loc.person} onClose={closeOverlay} />}
       {loc.ask !== undefined && <Ask initial={loc.ask} onClose={closeOverlay} />}
